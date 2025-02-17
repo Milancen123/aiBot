@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Q&A Demo</title>
+</head>
+<body>
+    <input type="text" id="questionInput" placeholder="Ask me anything">
+    <button id="submitButton">Ask</button>
+    <p id="answerContainer"></p>
+
+    <script>
+        document.getElementById('submitButton').addEventListener('click', async function() {
+            const question = document.getElementById('questionInput').value;
+            if (!question) {
+                alert('Enter a question.');
+                return;
+            }
+
+            const apiKey = "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";  // Replace with your DeepSeek v3 API key
+           const apiUrl = "https://openrouter.ai/api/v1/chat/completions"; // Ensure this is the correct endpoint
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`  // Ensure backticks are used here
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek/deepseek-chat:free",  // Ensure the model name is correct
+                        messages: [{ role: "user", content: question }]
+                    })
+                });
+
+                // Check if the response is successful
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("API Response:", data);  // Debugging: log the API response
+
+                // Ensure the response structure is correct before accessing it
+                if (data && data.choices && data.choices.length > 0 && data.choices[0].message) {
+                    document.getElementById('answerContainer').innerText = data.choices[0].message.content;
+                } else {
+                    document.getElementById('answerContainer').innerText = 'Sorry, no answer available.';
+                }
+
+            } catch (error) {
+                console.error("Error during API request:", error);
+                document.getElementById('answerContainer').innerText = 'An error occurred. Please try again later.';
+            }
+        });
+    </script>
+</body>
+</html>
